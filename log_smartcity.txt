@@ -1,0 +1,9 @@
+=== SIKLUS 3 ===
+Warga: Adi, Umur: 21, Suhu: 35.4, Polusi: 38, Aman: 1
+Warga: Budi, Umur: 36, Suhu: 36.3, Polusi: 42, Aman: 1
+Lampu Jalur 1: MERAH, Kendaraan: 1
+Lampu Jalur 2: HIJAU, Kendaraan: 7
+Lampu Jalur 3: MERAH, Kendaraan: 4
+Lampu Jalur 4: MERAH, Kendaraan: 0
+Lampu Jalur 5: HIJAU, Kendaraan: 9
+
