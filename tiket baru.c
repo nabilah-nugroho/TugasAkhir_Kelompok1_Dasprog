@@ -30,20 +30,20 @@ void simpan_data();
 int buat_id_unik();
 void tampilkan_tiket_detail(const Tiket *t);
 
-// Fungsionalitas Admin (Implementasi Ditingkatkan)
+// Fungsionalitas Admin
 void tambah_tiket();
 void lihat_semua_tiket_admin();
 void cari_tiket_admin();
-void update_tiket(); // FUNGSI BARU LENGKAP
-void hapus_tiket();  // FUNGSI BARU LENGKAP
+void update_tiket(); 
+void hapus_tiket();  
 void sorting_tiket();
-void update_otomatis_kadaluarsa(); // FUNGSI BARU LENGKAP
+void update_otomatis_kadaluarsa(); 
 void tampilkan_menu_admin();
 int login_admin();
 void mode_administrator();
 
-// Fungsionalitas Pelanggan
-void lihat_tiket_pelanggan();
+// Fungsionalitas Pelanggan (Diperbarui)
+void lihat_tiket_pelanggan(); // FUNGSI INI YANG DIUBAH
 void beli_tiket();
 void tampilkan_menu_pelanggan();
 void mode_pelanggan();
@@ -126,6 +126,7 @@ int buat_id_unik() {
 // 2. FUNGSI KHUSUS PELANGGAN (PEMBELI)
 // ==========================================================
 
+// FUNGSI INI DIUBAH: Menambahkan kolom 'Stok'
 void lihat_tiket_pelanggan() {
     printf("\n🛍️ --- DAFTAR TIKET TERSEDIA ---\n");
 
@@ -134,20 +135,22 @@ void lihat_tiket_pelanggan() {
         return;
     }
 
-    printf("----------------------------------------------------------------\n");
-    printf("| ID | Nama Konser          | Kategori           | Harga (Rp)   |\n");
-    printf("----------------------------------------------------------------\n");
+    // Menambah kolom Stok (Stk)
+    printf("------------------------------------------------------------------------\n");
+    printf("| ID | Nama Konser          | Kategori           | Harga (Rp)   | Stk |\n");
+    printf("------------------------------------------------------------------------\n");
 
     for (int i = 0; i < jumlah_tiket; i++) {
-        // HANYA tampilkan Nama, Kategori, Harga (dan ID untuk memudahkan pembelian)
-        printf("| %-2d | %-20s | %-18s | %-12.2f |\n",
+        // Tampilkan Nama, Kategori, Harga, dan STOK
+        printf("| %-2d | %-20s | %-18s | %-12.2f | %-3d |\n",
             daftar_tiket[i].id,
             daftar_tiket[i].nama_konser,
             daftar_tiket[i].kategori,
-            daftar_tiket[i].harga
+            daftar_tiket[i].harga,
+            daftar_tiket[i].jumlah_stok // Menampilkan Stok
         );
     }
-    printf("----------------------------------------------------------------\n");
+    printf("------------------------------------------------------------------------\n");
 }
 
 void beli_tiket() {
@@ -200,7 +203,7 @@ void tampilkan_menu_pelanggan() {
     printf("\n====================================\n");
     printf("👤 Selamat Datang, Pelanggan TIXUPNVJ\n");
     printf("====================================\n");
-    printf("1. Lihat Daftar Tiket (Harga & Kategori)\n");
+    printf("1. Lihat Daftar Tiket (Harga, Kategori & Stok)\n"); // Menu diubah
     printf("2. Beli Tiket\n");
     printf("3. Keluar ke Menu Utama\n");
     printf("------------------------------------\n");
@@ -481,7 +484,7 @@ void update_otomatis_kadaluarsa() {
         printf("✅ Total %d tiket kadaluarsa (lebih dari 7 hari) dihapus secara otomatis.\n", tiket_dihapus);
         simpan_data();
     } else {
-        printf("✅ Tidak ada tiket yang kadaluarsa.\n");
+        // printf("✅ Tidak ada tiket yang kadaluarsa.\n"); // Dihapus agar tidak terlalu banyak notifikasi
     }
 }
 
@@ -505,7 +508,7 @@ int login_admin() {
     char username[20];
     int password;
 
-    printf("\n🔐 Verifikasi Administrator\n");
+    printf("\n🔐 Verifikasi Administrator (admin: NabilahArkanKey, pass: 2025)\n");
     printf("Masukkan username admin: ");
     if (scanf("%19s", username) != 1) { bersihkan_buffer(); return 0; }
     bersihkan_buffer();
@@ -539,8 +542,8 @@ void mode_administrator() {
             case 1: tambah_tiket(); break;
             case 2: lihat_semua_tiket_admin(); break;
             case 3: cari_tiket_admin(); break;
-            case 4: update_tiket(); break; // LENGKAP
-            case 5: hapus_tiket(); break;  // LENGKAP
+            case 4: update_tiket(); break; 
+            case 5: hapus_tiket(); break;  
             case 6: sorting_tiket(); break;
             case 7: printf("\nKeluar dari mode Administrator.\n"); break;
             default: printf("\n❌ Pilihan tidak valid. Silakan coba lagi.\n"); break;
@@ -555,7 +558,7 @@ void mode_administrator() {
 
 int main() {
     muat_data();
-    update_otomatis_kadaluarsa(); // Jalankan saat program dimulai
+    update_otomatis_kadaluarsa(); 
 
     int pilihan_mode;
     int running = 1;
