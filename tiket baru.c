@@ -30,14 +30,14 @@ void simpan_data();
 int buat_id_unik();
 void tampilkan_tiket_detail(const Tiket *t);
 
-// Fungsionalitas Admin
+// Fungsionalitas Admin (Implementasi Ditingkatkan)
 void tambah_tiket();
 void lihat_semua_tiket_admin();
 void cari_tiket_admin();
-void update_tiket();
-void hapus_tiket();
+void update_tiket(); // FUNGSI BARU LENGKAP
+void hapus_tiket();  // FUNGSI BARU LENGKAP
 void sorting_tiket();
-void update_otomatis_kadaluarsa();
+void update_otomatis_kadaluarsa(); // FUNGSI BARU LENGKAP
 void tampilkan_menu_admin();
 int login_admin();
 void mode_administrator();
@@ -232,10 +232,30 @@ void tambah_tiket() {
     printf("\n➕ --- TAMBAH TIKET BARU ---\n");
     baru.id = buat_id_unik();
     printf("  ID Tiket Baru: %d\n", baru.id);
-    printf("  Masukkan Nama Konser: "); if (fgets(buffer, sizeof(buffer), stdin) == NULL) return; buffer[strcspn(buffer, "\n")] = 0; strncpy(baru.nama_konser, buffer, MAX_NAMA - 1);
-    printf("  Masukkan Kategori: "); if (fgets(buffer, sizeof(buffer), stdin) == NULL) return; buffer[strcspn(buffer, "\n")] = 0; strncpy(baru.kategori, buffer, MAX_KATEGORI - 1);
-    printf("  Masukkan Harga Tiket: Rp"); if (scanf("%f", &baru.harga) != 1 || baru.harga < 0) { printf("❌ Harga tidak valid.\n"); bersihkan_buffer(); return; } bersihkan_buffer();
-    printf("  Masukkan Jumlah Stok Tiket: "); if (scanf("%d", &baru.jumlah_stok) != 1 || baru.jumlah_stok < 0) { printf("❌ Jumlah stok tidak valid.\n"); bersihkan_buffer(); return; } bersihkan_buffer();
+    printf("  Masukkan Nama Konser: "); 
+    if (fgets(buffer, sizeof(buffer), stdin) == NULL) return; 
+    buffer[strcspn(buffer, "\n")] = 0; 
+    strncpy(baru.nama_konser, buffer, MAX_NAMA - 1);
+    
+    printf("  Masukkan Kategori: "); 
+    if (fgets(buffer, sizeof(buffer), stdin) == NULL) return; 
+    buffer[strcspn(buffer, "\n")] = 0; 
+    strncpy(baru.kategori, buffer, MAX_KATEGORI - 1);
+    
+    printf("  Masukkan Harga Tiket: Rp"); 
+    if (scanf("%f", &baru.harga) != 1 || baru.harga < 0) { 
+        printf("❌ Harga tidak valid.\n"); 
+        bersihkan_buffer(); return; 
+    } 
+    bersihkan_buffer();
+    
+    printf("  Masukkan Jumlah Stok Tiket: "); 
+    if (scanf("%d", &baru.jumlah_stok) != 1 || baru.jumlah_stok < 0) { 
+        printf("❌ Jumlah stok tidak valid.\n"); 
+        bersihkan_buffer(); return; 
+    } 
+    bersihkan_buffer();
+    
     baru.waktu_dibuat = time(NULL);
 
     Tiket *temp = (Tiket *)realloc(daftar_tiket, (jumlah_tiket + 1) * sizeof(Tiket));
@@ -245,6 +265,7 @@ void tambah_tiket() {
     jumlah_tiket++;
     printf("\n🎉 Tiket berhasil ditambahkan:\n");
     tampilkan_tiket_detail(&baru);
+    simpan_data();
 }
 
 void lihat_semua_tiket_admin() {
@@ -274,7 +295,7 @@ void cari_tiket_admin() {
                 char temp_nama[MAX_NAMA], temp_kriteria[MAX_NAMA]; strcpy(temp_nama, daftar_tiket[i].nama_konser); strcpy(temp_kriteria, kriteria_cari);
                 for(int j = 0; temp_nama[j]; j++){ temp_nama[j] = tolower(temp_nama[j]); }
                 for(int j = 0; temp_kriteria[j]; j++){ temp_kriteria[j] = tolower(temp_kriteria[j]); }
-                if (strstr(temp_nama, temp_kriteria) != NULL) { tampilkan_tiket_detail(&daftar_tiket[i]); ditemukan = 1; } 
+                if (strstr(temp_nama, temp_kriteria) != NULL) { printf("--- Hasil #%d ---\n", ++ditemukan); tampilkan_tiket_detail(&daftar_tiket[i]); } 
             } break;
         case 3:
             printf("Masukkan Kategori: "); if (fgets(kriteria_cari, sizeof(kriteria_cari), stdin) == NULL) return; kriteria_cari[strcspn(kriteria_cari, "\n")] = 0;
@@ -282,23 +303,128 @@ void cari_tiket_admin() {
                 char temp_kategori[MAX_KATEGORI], temp_kriteria[MAX_KATEGORI]; strcpy(temp_kategori, daftar_tiket[i].kategori); strcpy(temp_kriteria, kriteria_cari);
                 for(int j = 0; temp_kategori[j]; j++){ temp_kategori[j] = tolower(temp_kategori[j]); }
                 for(int j = 0; temp_kriteria[j]; j++){ temp_kriteria[j] = tolower(temp_kriteria[j]); }
-                if (strcmp(temp_kategori, temp_kriteria) == 0) { tampilkan_tiket_detail(&daftar_tiket[i]); ditemukan = 1; } 
+                if (strcmp(temp_kategori, temp_kriteria) == 0) { printf("--- Hasil #%d ---\n", ++ditemukan); tampilkan_tiket_detail(&daftar_tiket[i]); } 
             } break;
         default: printf("❌ Pilihan pencarian tidak valid.\n"); return;
     }
     if (!ditemukan) { printf("⚠️ Tiket tidak ditemukan.\n"); }
 }
 
-// ... (Implementasi fungsi update_tiket, hapus_tiket, sorting_tiket, dan update_otomatis_kadaluarsa sama seperti di kode sebelumnya, hanya untuk mode Admin) ...
-// (Untuk menghemat ruang, saya hanya mencantumkan prototipe dan logika inti yang sudah diimplementasikan di atas/di bawah)
+// ----------------------------------------------------------------------------------
+// FUNGSI UPDATE LENGKAP: Mengubah harga dan/atau stok berdasarkan ID
+// ----------------------------------------------------------------------------------
+void update_tiket() {
+    int id_update, index_tiket = -1, pilihan_update;
+    float harga_baru;
+    int stok_baru;
 
-// Fungsi perbandingan untuk qsort (berdasarkan harga).
+    printf("\n📝 --- UPDATE TIKET ---\n");
+    if (jumlah_tiket == 0) { printf("⚠️ Tidak ada tiket dalam sistem.\n"); return; }
+
+    printf("Masukkan ID Tiket yang akan diupdate: ");
+    if (scanf("%d", &id_update) != 1) { printf("❌ ID tidak valid.\n"); bersihkan_buffer(); return; }
+    bersihkan_buffer();
+
+    for (int i = 0; i < jumlah_tiket; i++) {
+        if (daftar_tiket[i].id == id_update) { index_tiket = i; break; }
+    }
+
+    if (index_tiket == -1) { printf("❌ Tiket dengan ID %d tidak ditemukan.\n", id_update); return; }
+
+    printf("\nDetail Tiket sebelum Update:\n");
+    tampilkan_tiket_detail(&daftar_tiket[index_tiket]);
+
+    printf("Pilih yang akan diupdate:\n1. Harga\n2. Stok\nPilih opsi (1/2): ");
+    if (scanf("%d", &pilihan_update) != 1) { printf("❌ Pilihan tidak valid.\n"); bersihkan_buffer(); return; }
+    bersihkan_buffer();
+
+    switch (pilihan_update) {
+        case 1:
+            printf("Masukkan HARGA BARU (Rp): ");
+            if (scanf("%f", &harga_baru) != 1 || harga_baru < 0) { 
+                printf("❌ Harga baru tidak valid.\n"); 
+                bersihkan_buffer(); return; 
+            }
+            daftar_tiket[index_tiket].harga = harga_baru;
+            printf("✅ Harga berhasil diupdate menjadi Rp%.2f\n", harga_baru);
+            break;
+        case 2:
+            printf("Masukkan JUMLAH STOK BARU: ");
+            if (scanf("%d", &stok_baru) != 1 || stok_baru < 0) { 
+                printf("❌ Jumlah stok baru tidak valid.\n"); 
+                bersihkan_buffer(); return; 
+            }
+            daftar_tiket[index_tiket].jumlah_stok = stok_baru;
+            printf("✅ Stok berhasil diupdate menjadi %d\n", stok_baru);
+            break;
+        default:
+            printf("❌ Pilihan update tidak valid.\n");
+            return;
+    }
+    bersihkan_buffer();
+    simpan_data();
+}
+
+// ----------------------------------------------------------------------------------
+// FUNGSI HAPUS LENGKAP: Menghapus tiket berdasarkan ID
+// ----------------------------------------------------------------------------------
+void hapus_tiket() {
+    int id_hapus, index_hapus = -1;
+    printf("\n🗑️ --- HAPUS TIKET ---\n");
+    if (jumlah_tiket == 0) { printf("⚠️ Tidak ada tiket dalam sistem.\n"); return; }
+    
+    printf("Masukkan ID Tiket yang akan dihapus: ");
+    if (scanf("%d", &id_hapus) != 1) { printf("❌ ID tidak valid.\n"); bersihkan_buffer(); return; }
+    bersihkan_buffer();
+
+    for (int i = 0; i < jumlah_tiket; i++) {
+        if (daftar_tiket[i].id == id_hapus) { index_hapus = i; break; }
+    }
+
+    if (index_hapus == -1) {
+        printf("❌ Tiket dengan ID %d tidak ditemukan.\n", id_hapus);
+        return;
+    }
+
+    // Geser elemen setelah index_hapus ke kiri
+    for (int i = index_hapus; i < jumlah_tiket - 1; i++) {
+        daftar_tiket[i] = daftar_tiket[i + 1];
+    }
+    jumlah_tiket--;
+
+    // Reallocate memori (opsional, tapi disarankan)
+    if (jumlah_tiket > 0) {
+        Tiket *temp = (Tiket *)realloc(daftar_tiket, jumlah_tiket * sizeof(Tiket));
+        if (temp == NULL) { 
+            // Jika realloc gagal, biarkan saja (memori masih teralokasi lebih), tapi beri peringatan
+            perror("⚠️ Peringatan: Gagal realloc setelah hapus."); 
+        } else {
+            daftar_tiket = temp;
+        }
+    } else {
+        // Jika tiket habis, bebaskan semua memori
+        free(daftar_tiket);
+        daftar_tiket = NULL;
+    }
+
+    printf("✅ Tiket dengan ID %d berhasil dihapus.\n", id_hapus);
+    simpan_data();
+}
+
+// ----------------------------------------------------------------------------------
+// FUNGSI SORTING
+// ----------------------------------------------------------------------------------
 int bandingkan_harga(const void *a, const void *b) {
     const Tiket *tiket_a = (const Tiket *)a;
     const Tiket *tiket_b = (const Tiket *)b;
     if (tiket_a->harga < tiket_b->harga) return -1;
     if (tiket_a->harga > tiket_b->harga) return 1;
     return 0;
+}
+int bandingkan_nama(const void *a, const void *b) {
+    const Tiket *tiket_a = (const Tiket *)a;
+    const Tiket *tiket_b = (const Tiket *)b;
+    return strcmp(tiket_a->nama_konser, tiket_b->nama_konser);
 }
 void sorting_tiket() {
     int pilihan_sort;
@@ -309,44 +435,56 @@ void sorting_tiket() {
 
     switch (pilihan_sort) {
         case 1: qsort(daftar_tiket, jumlah_tiket, sizeof(Tiket), bandingkan_harga); printf("✅ Tiket berhasil diurutkan berdasarkan Harga.\n"); lihat_semua_tiket_admin(); break;
+        case 2: qsort(daftar_tiket, jumlah_tiket, sizeof(Tiket), bandingkan_nama); printf("✅ Tiket berhasil diurutkan berdasarkan Nama Konser.\n"); lihat_semua_tiket_admin(); break;
         default: printf("❌ Pilihan pengurutan tidak valid.\n"); break;
     }
 }
-void update_tiket() {
-    int id_update;
-    printf("\n📝 --- UPDATE TIKET ---\n");
-    printf("Masukkan ID Tiket yang akan diupdate: ");
-    if (scanf("%d", &id_update) != 1) { printf("❌ ID tidak valid.\n"); bersihkan_buffer(); return; }
-    bersihkan_buffer();
-    // ... (Lanjutan logika update)
-    printf("Fungsi update tiket sudah selesai. Cek ID %d.\n", id_update);
-}
-void hapus_tiket() {
-    int id_hapus;
-    printf("\n🗑️ --- HAPUS TIKET ---\n");
-    printf("Masukkan ID Tiket yang akan dihapus: ");
-    if (scanf("%d", &id_hapus) != 1) { printf("❌ ID tidak valid.\n"); bersihkan_buffer(); return; }
-    bersihkan_buffer();
-    // ... (Lanjutan logika hapus)
-    printf("Fungsi hapus tiket sudah selesai. Cek ID %d.\n", id_hapus);
-}
+
+// ----------------------------------------------------------------------------------
+// FUNGSI HAPUS KADALUARSA LENGKAP: Hapus tiket yang sudah lebih dari 7 hari
+// ----------------------------------------------------------------------------------
 void update_otomatis_kadaluarsa() {
     if (jumlah_tiket == 0) return;
     time_t waktu_sekarang = time(NULL);
-    int tiket_dihapus = 0; int i = 0;
+    int tiket_dihapus = 0; 
+    int i = 0;
+
+    // Gunakan loop while untuk menghandle pergeseran index setelah penghapusan
     while (i < jumlah_tiket) {
         if (waktu_sekarang - daftar_tiket[i].waktu_dibuat > KADALUARSA_DETIK) {
-             // ... (Logika penghapusan dan realloc)
-            tiket_dihapus++;
-        } else { i++; }
+             // Geser elemen setelah index i ke kiri (menghapus elemen di index i)
+             for (int j = i; j < jumlah_tiket - 1; j++) {
+                 daftar_tiket[j] = daftar_tiket[j + 1];
+             }
+             jumlah_tiket--;
+             tiket_dihapus++;
+             // TIDAK perlu menaikkan i, karena elemen baru sudah mengisi posisi i
+        } else { 
+            i++; // Lanjut ke elemen berikutnya
+        }
     }
+    
     if (tiket_dihapus > 0) {
-        printf("✅ Total %d tiket kadaluarsa dihapus.\n", tiket_dihapus);
+        // Reallocate memori setelah penghapusan massal
+        if (jumlah_tiket > 0) {
+            Tiket *temp = (Tiket *)realloc(daftar_tiket, jumlah_tiket * sizeof(Tiket));
+            if (temp == NULL) { 
+                perror("⚠️ Peringatan: Gagal realloc setelah hapus kadaluarsa."); 
+            } else {
+                daftar_tiket = temp;
+            }
+        } else {
+            free(daftar_tiket);
+            daftar_tiket = NULL;
+        }
+
+        printf("✅ Total %d tiket kadaluarsa (lebih dari 7 hari) dihapus secara otomatis.\n", tiket_dihapus);
         simpan_data();
     } else {
         printf("✅ Tidak ada tiket yang kadaluarsa.\n");
     }
 }
+
 
 void tampilkan_menu_admin() {
     printf("\n====================================\n");
@@ -367,9 +505,9 @@ int login_admin() {
     char username[20];
     int password;
 
-    printf("\n🔐 Verifikasi Administrator (admin: NabilahArkanKey, pass: 2025)\n");
+    printf("\n🔐 Verifikasi Administrator\n");
     printf("Masukkan username admin: ");
-    if (scanf("%19s", username) != 1) return 0;
+    if (scanf("%19s", username) != 1) { bersihkan_buffer(); return 0; }
     bersihkan_buffer();
 
     if (strcmp(username, "NabilahArkanKey") == 0) {
@@ -385,6 +523,7 @@ int login_admin() {
             return 0;
         }
     } else {
+        printf("❌ Username salah! Akses ditolak.\n");
         return 0;
     }
 }
@@ -400,8 +539,8 @@ void mode_administrator() {
             case 1: tambah_tiket(); break;
             case 2: lihat_semua_tiket_admin(); break;
             case 3: cari_tiket_admin(); break;
-            case 4: update_tiket(); break;
-            case 5: hapus_tiket(); break;
+            case 4: update_tiket(); break; // LENGKAP
+            case 5: hapus_tiket(); break;  // LENGKAP
             case 6: sorting_tiket(); break;
             case 7: printf("\nKeluar dari mode Administrator.\n"); break;
             default: printf("\n❌ Pilihan tidak valid. Silakan coba lagi.\n"); break;
@@ -416,7 +555,7 @@ void mode_administrator() {
 
 int main() {
     muat_data();
-    update_otomatis_kadaluarsa();
+    update_otomatis_kadaluarsa(); // Jalankan saat program dimulai
 
     int pilihan_mode;
     int running = 1;
