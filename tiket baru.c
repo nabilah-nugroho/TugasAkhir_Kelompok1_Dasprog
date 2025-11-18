@@ -126,29 +126,38 @@ int buat_id_unik() {
 // 2. FUNGSI KHUSUS PELANGGAN (PEMBELI)
 // ==========================================================
 
-// FUNGSI INI DIUBAH: Menambahkan kolom 'Stok'
+// FUNGSI INI DIUBAH: Hanya menampilkan tiket dengan stok > 0
 void lihat_tiket_pelanggan() {
     printf("\n🛍️ --- DAFTAR TIKET TERSEDIA ---\n");
+    int tiket_tersedia = 0;
 
-    if (jumlah_tiket == 0) {
+    for (int i = 0; i < jumlah_tiket; i++) {
+        if (daftar_tiket[i].jumlah_stok > 0) {
+            tiket_tersedia = 1;
+            break;
+        }
+    }
+
+    if (jumlah_tiket == 0 || !tiket_tersedia) {
         printf("⚠️ Saat ini tidak ada tiket yang tersedia untuk dijual.\n");
         return;
     }
 
-    // Menambah kolom Stok (Stk)
     printf("------------------------------------------------------------------------\n");
     printf("| ID | Nama Konser          | Kategori           | Harga (Rp)   | Stk |\n");
     printf("------------------------------------------------------------------------\n");
 
     for (int i = 0; i < jumlah_tiket; i++) {
-        // Tampilkan Nama, Kategori, Harga, dan STOK
-        printf("| %-2d | %-20s | %-18s | %-12.2f | %-3d |\n",
-            daftar_tiket[i].id,
-            daftar_tiket[i].nama_konser,
-            daftar_tiket[i].kategori,
-            daftar_tiket[i].harga,
-            daftar_tiket[i].jumlah_stok // Menampilkan Stok
-        );
+        // HANYA tampilkan jika STOK > 0
+        if (daftar_tiket[i].jumlah_stok > 0) {
+            printf("| %-2d | %-20s | %-18s | %-12.2f | %-3d |\n",
+                daftar_tiket[i].id,
+                daftar_tiket[i].nama_konser,
+                daftar_tiket[i].kategori,
+                daftar_tiket[i].harga,
+                daftar_tiket[i].jumlah_stok
+            );
+        }
     }
     printf("------------------------------------------------------------------------\n");
 }
@@ -168,6 +177,7 @@ void beli_tiket() {
         if (daftar_tiket[i].id == id_beli) { index_tiket = i; break; }
     }
 
+    // Penambahan: Memastikan stok > 0 saat proses pembelian
     if (index_tiket == -1 || daftar_tiket[index_tiket].jumlah_stok == 0) {
         printf("❌ Tiket tidak ditemukan atau Stok Habis.\n");
         return;
@@ -203,7 +213,7 @@ void tampilkan_menu_pelanggan() {
     printf("\n====================================\n");
     printf("👤 Selamat Datang, Pelanggan TIXUPNVJ\n");
     printf("====================================\n");
-    printf("1. Lihat Daftar Tiket (Harga, Kategori & Stok)\n"); // Menu diubah
+    printf("1. Lihat Daftar Tiket (Harga, Kategori & Stok)\n");
     printf("2. Beli Tiket\n");
     printf("3. Keluar ke Menu Utama\n");
     printf("------------------------------------\n");
@@ -484,7 +494,7 @@ void update_otomatis_kadaluarsa() {
         printf("✅ Total %d tiket kadaluarsa (lebih dari 7 hari) dihapus secara otomatis.\n", tiket_dihapus);
         simpan_data();
     } else {
-        // printf("✅ Tidak ada tiket yang kadaluarsa.\n"); // Dihapus agar tidak terlalu banyak notifikasi
+        // Notifikasi dihapus
     }
 }
 
